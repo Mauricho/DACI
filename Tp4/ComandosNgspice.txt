@@ -1,0 +1,103 @@
+name=simulation only_toplevel=false 
+value="
+
+* Circuit Parameters
+.param iref = 100u
+.param vdd  = 1.8
+.param vss  = 0.0
+.param vcm  = 0.9
+.param vac  = 10m
+.param multiplier = 1
+.param load = 0.001f
+.param ww = 0.45
+.options TEMP = 65.0
+
+
+* Models
+.lib ~/skywater/skywater-pdk/libraries/sky130_fd_pr_ngspice/latest/models/corners/sky130.lib TT
+
+* Data to save
+.save all
++ @M.XM1.msky130_fd_pr__nfet_01v8[id]
++ @M.XM1.msky130_fd_pr__nfet_01v8[gm]
++ @M.XM1.msky130_fd_pr__nfet_01v8[gds]
++ @M.XM1.msky130_fd_pr__nfet_01v8[vth]
++ @M.XM1.msky130_fd_pr__nfet_01v8[vds]
++ @M.XM1.msky130_fd_pr__nfet_01v8[vdsat]
++ @M.XM1.msky130_fd_pr__nfet_01v8[vgs]
++ @M.XM1.msky130_fd_pr__nfet_01v8[cgs]
++ @M.XM1.msky130_fd_pr__nfet_01v8[cgd]
++ @M.XM1.msky130_fd_pr__nfet_01v8[cds]
++ @M.XM1.msky130_fd_pr__nfet_01v8[cgg]
+
+* Simulation
+.control
+
+******************************************************
+* barrido w AC OP
+******************************************************
+foreach mm 1 2 3 4 5
+  alterparam multiplier = $mm
+  *alterparam load = 1f
+  reset
+  op
+  print @M.XM1.msky130_fd_pr__nfet_01v8[w]
+  print @M.XM1.msky130_fd_pr__nfet_01v8[gm]
+  print @M.XM1.msky130_fd_pr__nfet_01v8[cgs]
+  print @M.XM1.msky130_fd_pr__nfet_01v8[cgd]
+  print @M.XM1.msky130_fd_pr__nfet_01v8[cds]
+  print @M.XM1.msky130_fd_pr__nfet_01v8[cgg]
+  ac dec 10 10k 5000G
+  set appendwrite
+  write tp4_w.raw all
+end
+
+plot vdb(ac1.vout) vdb(ac2.vout) vdb(ac3.vout) vdb(ac4.vout) vdb(ac5.vout)
+plot vp(ac1.vout)*180/pi vp(ac2.vout)*180/pi vp(ac3.vout)*180/pi vp(ac4.vout)*180/pi vp(ac5.vout)*180/pi
+
+******************************************************
+* barrido c0 AC
+******************************************************
+foreach cl 0.001f 1f 2f 5f 10f
+  alterparam load = $cl
+  alterparam multiplier = 2
+  reset
+  ac dec 100 10k 1000G
+  set appendwrite
+  write data_cl.raw all
+end
+
+plot vdb(ac1.vout) vdb(ac2.vout) vdb(ac3.vout) vdb(ac4.vout) vdb(ac5.vout)
+plot vp(ac1.vout)*180/pi vp(ac2.vout)*180/pi vp(ac3.vout)*180/pi vp(ac4.vout)*180/pi vp(ac5.vout)*180/pi
+
+******************************************************
+* analisis ruido w
+******************************************************
+alterparam multiplier = 1
+alterparam load = 0.001f
+reset  
+noise v(vout) V4 dec 100 10 1000G 1
+setplot noise1
+plot onoise_spectrum ylog xlog
+*plot inoise_spectrum onoise_spectrum ylog xlog
+
+setplot noise2
+print inoise_total
+print onoise_total
+print onoise_total.m.xm1.msky130_fd_pr__nfet_01v8.1overf 
+print onoise_total.m.xm1.msky130_fd_pr__nfet_01v8.id 
+
+set filetype=ascii
+write tp4_noise.raw
+
+******************************************************
+* op
+******************************************************
+unset filetype
+op
+save all
+write tp4.raw
+
+.endc
+.end
+"

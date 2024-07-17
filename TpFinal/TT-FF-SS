@@ -1,0 +1,39 @@
+TT:
+* Circuit Parameters
+.param iref = 100u
+.param vdd  = 1.8
+.param vss  = 0.0
+.param vcm  = 0.8
+.param vac  = 10m
+.param fin  = 9.765625e5
+.options TEMP = 65.0
+
+* Include Models
+.lib ~/skywater/skywater-pdk/libraries/sky130_fd_pr_ngspice/latest/models/corners/sky130.lib TT
+
+FF:
+* Circuit Parameters
+.param iref = 105u
+.param vdd  = 1.98
+.param vss  = 0.0
+.param vcm  = 0.88
+.param vac  = 10m
+.param fin  = 9.765625e5
+.options TEMP = 0.0
+
+* Include Models
+.lib ~/skywater/skywater-pdk/libraries/sky130_fd_pr_ngspice/latest/models/corners/sky130.lib FF
+
+SS:
+* Circuit Parameters
+.param iref = 95u
+.param vdd  = 1.62
+.param vss  = 0.0
+.param vcm  = 0.72
+.param vac  = 10m
+.param fin  = 9.765625e5
+.options TEMP = 125.0
+
+* Include Models
+.lib ~/skywater/skywater-pdk/libraries/sky130_fd_pr_ngspice/latest/models/corners/sky130.lib SS
+
